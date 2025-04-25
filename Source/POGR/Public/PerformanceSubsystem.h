@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Subsystems/GameInstanceSubsystem.h"
 #include "PerformanceSubsystem.generated.h"
 
 UCLASS(BlueprintType)

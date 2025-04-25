@@ -3,23 +3,25 @@
 #include "CoreMinimal.h"
 #include "POGRGameData.generated.h"
 
+class UTexture2D;
+
 USTRUCT(BlueprintType)
 struct FOrganizationGameData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Pogr Game Data")
 	FString UUID;
 	FString StudioUUID;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Pogr Game Data")
 	FString GameTitle;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Pogr Game Data")
 	FString URL;
 	FString CreatedOn;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Pogr Game Data")
 	UTexture2D* GameImage;
 
 	bool operator==(const FOrganizationGameData& Other) const

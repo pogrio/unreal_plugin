@@ -8,7 +8,7 @@ struct FGameSystemSettings
 {
     GENERATED_BODY()
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Monitor")
     FString graphics_quality;
 };
 
@@ -18,15 +18,15 @@ struct FGameSystemMetrics
 {
     GENERATED_BODY()
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Monitor")
     float cpu_usage = 0.0f;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Monitor")
     float memory_usage = 0.0f;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Monitor")
     TArray<FString> dlls_loaded;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Monitor")
     FGameSystemSettings settings;
 };

@@ -8,10 +8,10 @@ struct FPlayerEventData
 {
     GENERATED_BODY()
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Event")
     FString player_id;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Event")
     FString achievement_name;
 };
 
@@ -20,21 +20,21 @@ struct FGameEvent
 {
     GENERATED_BODY()
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Event")
     FString event;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Event")
     FString sub_event;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Event")
     FString event_type;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Event")
     FString event_flag;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Event")
     FString event_key;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = "Pogr Game Event")
     FPlayerEventData event_data;
 };

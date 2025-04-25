@@ -2,9 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Engine/DeveloperSettings.h"
 #include "POGRSettings.generated.h"
 
-UCLASS(config = Engine, defaultconfig, meta = (DisplayName = "POGR"))
+
+UCLASS(config = Game, defaultconfig, meta = (DisplayName = "POGR"))
 class UPOGREndpointSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()

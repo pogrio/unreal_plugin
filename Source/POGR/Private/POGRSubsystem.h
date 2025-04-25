@@ -101,47 +101,47 @@ public:
 	);
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void GetOrganizationData();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void GetOrganizationGameData(const FString& GameUUID);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void GetUserProfileData();
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void ListDataPayloads();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void UpdateDataStatus(EAcceptedStatus AcceptedStatus, FString DataId);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void GetDataPayloadDefinition(FString DataId);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void GetDataReceived(FString DataId);
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	FString GetPogrUrl(URLAction Action, URLDefinition Definition, EAcceptedStatus Status = EAcceptedStatus::Ignored, FString BuildId = FString("None"), FString DataId = FString("None"));
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Pogr Subsystem")
 	const TArray<FDataPayload> GetDataPayloadArray() const { return DataPayloads; }
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Pogr Subsystem")
 	const TArray<FOrganizationData> GetOrganizationDataArray() const { return OrganizationData; }
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Pogr Subsystem")
 	const TArray<FOrganizationGameData> GetOrganizationGameDataArray() const { return OrganizationGameData; }
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void SetPayloadDatatype(URLDefinition PayloadDatatype);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	FString ConstructOrgGameURL(const FString& Id);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	FString ConstructGameDetailURL(const FString& Id);
 
 public:
@@ -171,35 +171,35 @@ public:
 
 	// Selecting An Organization And Game
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void SetOrganizationOption(FString OrganizationValue);
 
-	UFUNCTION(BlueprintPure)
-	const FOrganizationData GetOrganization() const { return Organization; }
+	UFUNCTION(BlueprintPure, Category = "Pogr Subsystem")
+	const FOrganizationData GetOrganization() const { return OrganizationDetails; }
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void SetGameOption(FString GameValue);
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Pogr Subsystem")
 	const FOrganizationGameData GetSelectedGameTitle() const { return Game; }
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Pogr Subsystem")
 	const FUserProfileData GetUserProfile() const { return UserProfileData; }
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void SetGameTitleTexture(UTexture2DDynamic* Texture);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void SetOrganizationTitleTexture(UTexture2DDynamic* Texture);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Pogr Subsystem")
 	void SetUserProfileTexture(UTexture2DDynamic* Texture);
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Pogr Subsystem")
 	const UTexture2DDynamic* GetGameTitleTexture() const { return GameTitleTexture; }
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Pogr Subsystem")
 	const UTexture2DDynamic* GetOrganizationTitleTexture() const { return OrganizationTitleTexture; }
 
 protected:
@@ -230,32 +230,32 @@ private:
 	void OnWebSocketMessage(const FString& Message);
 
 public:
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category = "Pogr Subsystem")
 	FOnLoginComplete OnLoginComplete;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category = "Pogr Subsystem")
 	FOnSessionCreationCallback OnSessionCreationCallback;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category = "Pogr Subsystem")
 	FOnPayloadCreationCallback OnPayloadCreationCallback;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category = "Pogr Subsystem")
 	FOnPayloadCallback OnPayloadCallback;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category = "Pogr Subsystem")
 	FOnPayloadDataUpdate OnPayloadDataUpdate;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category = "Pogr Subsystem")
 	FOnOrganizationCallback OnOrganizationCallback;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category = "Pogr Subsystem")
 	FOnGameCallback OnGameCallback;
 
 private:
 	const class UPOGREndpointSettings* POGRSettings;
 	FString ActiveSessionId = FString();
 	FString AccessTokken = FString();
-	UJsonRequestObject* JsonObject;
+	UJsonRequestObject* jsonObject;
 	TSharedPtr<IWebSocket> WebSocket;
 	bool IsLoggedIn;
 	bool bIsSessionActive;
@@ -276,7 +276,7 @@ private:
 	URLDefinition PayloadDefinition = URLDefinition::Data;
 
 private:
-	FOrganizationData Organization;
+	FOrganizationData OrganizationDetails;
 	FOrganizationGameData Game;
 	
 private:

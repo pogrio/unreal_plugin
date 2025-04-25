@@ -9,21 +9,21 @@ struct FDataPayload
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "Pogr Data Payload")
 	FString Id;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "Pogr Data Payload")
 	FString ClientId;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "Pogr Data Payload")
 	FString BuildId;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "Pogr Data Payload")
 	TEnumAsByte<EAcceptedStatus> AcceptedStatus;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "Pogr Data Payload")
 	FString DataReceivedDate;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "Pogr Data Payload")
 	int32 Calls;
 };

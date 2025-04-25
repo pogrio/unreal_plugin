@@ -42,6 +42,7 @@ public class POGR : ModuleRules
 				"SlateCore",
                 "HTTP",
                 "Json",
+				"JsonUtilities",
                 "WebSockets",
                 "DeveloperSettings",
 				"UMG"

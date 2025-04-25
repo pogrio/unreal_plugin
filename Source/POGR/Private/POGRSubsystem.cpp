@@ -1,12 +1,14 @@
 #include "POGRSubsystem.h"
 #include "POGR.h"
-#include "WebSockets/Public/IWebSocket.h"
-#include "WebSockets/Public/WebSocketsModule.h"
-#include "WebSockets/Public/IWebSocketsManager.h"
-#include "JsonUtilities/Public/JsonObjectConverter.h"
+#include "IWebSocket.h"
+#include "WebSocketsModule.h"
+#include "IWebSocketsManager.h"
+#include "JsonObjectConverter.h"
 #include "Misc/Guid.h"
 #include "Http.h"
-#include "Json.h"
+#include "Dom/JsonObject.h"
+#include "Serialization/JsonSerializer.h"
+#include "Serialization/JsonWriter.h"
 #include "POGRSettings.h"
 #include "POGRJsonObject.h"
 #include "Async/TaskGraphInterfaces.h"
@@ -63,15 +65,15 @@ void UPOGRSubsystem::CreateSessionWithAssociationId(const FString& ClientId, con
                     FJsonSerializer::Deserialize(Reader, ResponseObj);
                 }
 
-                if (ResponseObj->HasField("payload"))
+                if (ResponseObj->HasField(TEXT("payload")))
                 {
                     // Get the "payload" object
-                    TSharedPtr<FJsonObject> PayloadObject = ResponseObj->GetObjectField("payload");
+                    TSharedPtr<FJsonObject> PayloadObject = ResponseObj->GetObjectField(TEXT("payload"));
 
                     // Check if the "payload" object contains the "redirect_url" field
-                    if (PayloadObject->HasField("session_id"))
+                    if (PayloadObject->HasField(TEXT("session_id")))
                     {
-                        FString SessionId = PayloadObject->GetStringField("session_id");
+                        FString SessionId = PayloadObject->GetStringField(TEXT("session_id"));
 
                         if (!SessionId.IsEmpty())
                         {
@@ -121,15 +123,15 @@ void UPOGRSubsystem::CreateSessionWithTokken(const FString& ClientId, const FStr
                     FJsonSerializer::Deserialize(Reader, ResponseObj);
                 }
 
-                if (ResponseObj->HasField("payload"))
+                if (ResponseObj->HasField(TEXT("payload")))
                 {
                     // Get the "payload" object
-                    TSharedPtr<FJsonObject> PayloadObject = ResponseObj->GetObjectField("payload");
+                    TSharedPtr<FJsonObject> PayloadObject = ResponseObj->GetObjectField(TEXT("payload"));
 
                     // Check if the "payload" object contains the "redirect_url" field
-                    if (PayloadObject->HasField("session_id"))
+                    if (PayloadObject->HasField(TEXT("session_id")))
                     {
-                        FString SessionId = PayloadObject->GetStringField("session_id");
+                        FString SessionId = PayloadObject->GetStringField(TEXT("session_id"));
 
                         if (!SessionId.IsEmpty())
                         {
@@ -175,7 +177,7 @@ void UPOGRSubsystem::SendGameMetricsEvent(const FGameMetrics& GameMertrics, cons
 {
     static FCriticalSection Mutex;
 
-    FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([=]()
+    FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([&]()
     {
        FScopeLock Lock(&Mutex);
        UJsonRequestObject* JsonObject = this->GetJsonRequestObject();
@@ -201,7 +203,7 @@ void UPOGRSubsystem::SendGameUserEvent(const FGameEvent& GameEvent, const FStrin
 {
     static FCriticalSection Mutex;
 
-    FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([=]()
+    FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([&]()
     {
        FScopeLock Lock(&Mutex);
        UJsonRequestObject* JsonObject = this->GetJsonRequestObject();
@@ -220,11 +222,11 @@ void UPOGRSubsystem::SendGameUserEvent(const FGameEvent& GameEvent, const FStrin
     }, TStatId(), nullptr, ENamedThreads::AnyThread);
 }
 
-void UPOGRSubsystem::SendGameDataEvent(const UJsonRequestObject* jsonObject, const FString& SessionId)
+void UPOGRSubsystem::SendGameDataEvent(const UJsonRequestObject* JsonObject, const FString& SessionId)
 {
-    FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([=]()
+    FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([&]()
     {
-       SendHttpRequest(POGRSettings->GetDataEndpoint(), jsonObject, SessionId);
+       SendHttpRequest(POGRSettings->GetDataEndpoint(), JsonObject, SessionId);
     }, TStatId(), nullptr, ENamedThreads::AnyThread);
 }
 
@@ -232,8 +234,8 @@ void UPOGRSubsystem::SendGameLogsEvent(const FGameLog& GameLog, const FString& S
 {
     static FCriticalSection Mutex;
 
-    FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([=]()
-        {
+    FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([&]()
+    {
             FScopeLock Lock(&Mutex);
             UJsonRequestObject* JsonObject = this->GetJsonRequestObject();
             JsonObject->SetStringField(FString("service"), GameLog.service);
@@ -261,7 +263,7 @@ void UPOGRSubsystem::SendGamePerformanceEvent(const FGameSystemMetrics& GamePerf
 {
     static FCriticalSection Mutex;
 
-    FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([=]()
+    FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([&]()
     {
        FScopeLock Lock(&Mutex);
        UJsonRequestObject* JsonObject = this->GetJsonRequestObject();
@@ -371,14 +373,14 @@ void UPOGRSubsystem::GetOrganizationData()
                     FJsonSerializer::Deserialize(Reader, ResponseObj);
                 }
 
-                if (ResponseObj->HasField("payload"))
+                if (ResponseObj->HasField(TEXT("payload")))
                 {
                     // Get the "payload" object
-                    TSharedPtr<FJsonObject> PayloadObject = ResponseObj->GetObjectField("payload");
+                    TSharedPtr<FJsonObject> PayloadObject = ResponseObj->GetObjectField(TEXT("payload"));
 
                     // Check if the "payload" object contains the "organizations" field
                     const TArray<TSharedPtr<FJsonValue>>* OrganizationsArray;
-                    if (PayloadObject->TryGetArrayField("organizations", OrganizationsArray))
+                    if (PayloadObject->TryGetArrayField(TEXT("organizations"), OrganizationsArray))
                     {
                         OrganizationData.Empty();
 
@@ -389,15 +391,15 @@ void UPOGRSubsystem::GetOrganizationData()
                             {
                                 FOrganizationData Organization;
 
-                                Organization.UUID = OrganizationObject->GetStringField("uid");
-                                Organization.Name = OrganizationObject->GetStringField("name");
-                                Organization.CreatedOn = OrganizationObject->GetStringField("created_on");
-                                Organization.Type = OrganizationObject->GetStringField("type");
+                                Organization.UUID = OrganizationObject->GetStringField(TEXT("uid"));
+                                Organization.Name = OrganizationObject->GetStringField(TEXT("name"));
+                                Organization.CreatedOn = OrganizationObject->GetStringField(TEXT("created_on"));
+                                Organization.Type = OrganizationObject->GetStringField(TEXT("type"));
 
-                                const TSharedPtr<FJsonObject> LogoObject = OrganizationObject->GetObjectField("logo");
+                                const TSharedPtr<FJsonObject> LogoObject = OrganizationObject->GetObjectField(TEXT("logo"));
                                 if (LogoObject.IsValid())
                                 {
-                                    Organization.URL = LogoObject->GetStringField("url");
+                                    Organization.URL = LogoObject->GetStringField(TEXT("url"));
                                 }
 
                                 OrganizationData.AddUnique(Organization);
@@ -406,7 +408,7 @@ void UPOGRSubsystem::GetOrganizationData()
 
                         if (OrganizationData.Num() > 0)
                         {
-                            Organization = OrganizationData[0];
+                            OrganizationDetails = OrganizationData[0];
                         }
                     }
                 }
@@ -443,7 +445,7 @@ void UPOGRSubsystem::GetOrganizationGameData(const FString& GameUUID)
                 }
 
                 const TArray<TSharedPtr<FJsonValue>>* PayloadArray;
-                if (ResponseObj->TryGetArrayField("payload", PayloadArray))
+                if (ResponseObj->TryGetArrayField(TEXT("payload"), PayloadArray))
                 {
                     if (GetUpdateOptions())
                     {
@@ -456,18 +458,18 @@ void UPOGRSubsystem::GetOrganizationGameData(const FString& GameUUID)
                             {
                                 FOrganizationGameData Organization;
 
-                                Organization.UUID = PayloadObject->GetStringField("uid");
-                                Organization.StudioUUID = PayloadObject->GetStringField("studio_org_uid");
-                                Organization.GameTitle = PayloadObject->GetStringField("name");
-                                Organization.CreatedOn = PayloadObject->GetStringField("created_on");
+                                Organization.UUID = PayloadObject->GetStringField(TEXT("uid"));
+                                Organization.StudioUUID = PayloadObject->GetStringField(TEXT("studio_org_uid"));
+                                Organization.GameTitle = PayloadObject->GetStringField(TEXT("name"));
+                                Organization.CreatedOn = PayloadObject->GetStringField(TEXT("created_on"));
 
-                                const TSharedPtr<FJsonObject> LogoObject = PayloadObject->GetObjectField("logo");
+                                const TSharedPtr<FJsonObject> LogoObject = PayloadObject->GetObjectField(TEXT("logo"));
                                 if (LogoObject.IsValid())
                                 {
-                                    Organization.URL = LogoObject->GetStringField("url");
+                                    Organization.URL = LogoObject->GetStringField(TEXT("url"));
                                 }
 
-                                const TSharedPtr<FJsonObject> GameBuildIdObject = PayloadObject->GetObjectField("game_build");
+                                const TSharedPtr<FJsonObject> GameBuildIdObject = PayloadObject->GetObjectField(TEXT("game_build"));
                                 if (GameBuildIdObject.IsValid())
                                 {
                                     SetGameBuildId(Organization.UUID);
@@ -512,17 +514,17 @@ void UPOGRSubsystem::GetUserProfileData()
                     FJsonSerializer::Deserialize(Reader, ResponseObj);
                 }
 
-                if (ResponseObj->HasField("payload"))
+                if (ResponseObj->HasField(TEXT("payload")))
                 {
                     // Get the "payload" object
-                    TSharedPtr<FJsonObject> PayloadObject = ResponseObj->GetObjectField("payload");
+                    TSharedPtr<FJsonObject> PayloadObject = ResponseObj->GetObjectField(TEXT("payload"));
 
-                    UserProfileData.UserName = PayloadObject->GetStringField("username");
-                    UserProfileData.DisplayName = PayloadObject->GetStringField("display_name");
-                    UserProfileData.AvatarURL = PayloadObject->GetStringField("avatar");
-                    UserProfileData.Level = FCString::Atoi(*PayloadObject->GetStringField("level"));
-                    UserProfileData.Exp = FCString::Atoi(*PayloadObject->GetStringField("total_exp"));
-                    UserProfileData.RequiredExp = FCString::Atoi(*PayloadObject->GetStringField("exp_required"));
+                    UserProfileData.UserName = PayloadObject->GetStringField(TEXT("username"));
+                    UserProfileData.DisplayName = PayloadObject->GetStringField(TEXT("display_name"));
+                    UserProfileData.AvatarURL = PayloadObject->GetStringField(TEXT("avatar"));
+                    UserProfileData.Level = FCString::Atoi(*PayloadObject->GetStringField(TEXT("level")));
+                    UserProfileData.Exp = FCString::Atoi(*PayloadObject->GetStringField(TEXT("total_exp")));
+                    UserProfileData.RequiredExp = FCString::Atoi(*PayloadObject->GetStringField(TEXT("exp_required")));
                 }
             }
             else
@@ -555,14 +557,14 @@ void UPOGRSubsystem::ListDataPayloads()
                     FJsonSerializer::Deserialize(Reader, ResponseObj);
                 }
                 
-                if (ResponseObj->HasField("payload"))
+                if (ResponseObj->HasField(TEXT("payload")))
                 {
                     // Get the "payload" object
-                    TSharedPtr<FJsonObject> PayloadObject = ResponseObj->GetObjectField("payload");
+                    TSharedPtr<FJsonObject> PayloadObject = ResponseObj->GetObjectField(TEXT("payload"));
 
                     // Check if the "payload" object contains the "organizations" field
                     const TArray<TSharedPtr<FJsonValue>>* DataArray;
-                    if (PayloadObject->TryGetArrayField("data", DataArray))
+                    if (PayloadObject->TryGetArrayField(TEXT("data"), DataArray))
                     {
                         DataPayloads.Empty();
 
@@ -573,12 +575,12 @@ void UPOGRSubsystem::ListDataPayloads()
                             {
                                 FDataPayload DataPayload;
 
-                                DataPayload.Id = DataObject->GetStringField("id");
-                                DataPayload.ClientId = DataObject->GetStringField("client_id");
-                                DataPayload.BuildId = DataObject->GetStringField("build_id");
-                                DataPayload.AcceptedStatus = (EAcceptedStatus)FCString::Atoi(*DataObject->GetStringField("accepted_status"));
-                                DataPayload.DataReceivedDate = DataObject->GetStringField("first_data_received_date");
-                                DataPayload.Calls = FCString::Atoi(*DataObject->GetStringField("calls"));
+                                DataPayload.Id = DataObject->GetStringField(TEXT("id"));
+                                DataPayload.ClientId = DataObject->GetStringField(TEXT("client_id"));
+                                DataPayload.BuildId = DataObject->GetStringField(TEXT("build_id"));
+                                DataPayload.AcceptedStatus = (EAcceptedStatus)FCString::Atoi(*DataObject->GetStringField(TEXT("accepted_status")));
+                                DataPayload.DataReceivedDate = DataObject->GetStringField(TEXT("first_data_received_date"));
+                                DataPayload.Calls = FCString::Atoi(*DataObject->GetStringField(TEXT("calls")));
 
                                 DataPayloads.Add(DataPayload);
                             }
@@ -824,9 +826,9 @@ FString UPOGRSubsystem::GetPogrUrl(URLAction Action, URLDefinition Definition, E
 
 UJsonRequestObject* UPOGRSubsystem::GetJsonRequestObject()
 {
-    JsonObject = NewObject<UJsonRequestObject>();
-    JsonObject->ConstructJsonObject();
-    return JsonObject;
+    jsonObject = NewObject<UJsonRequestObject>();
+    jsonObject->ConstructJsonObject();
+    return jsonObject;
 }
 
 void UPOGRSubsystem::SetGameTitleTexture(UTexture2DDynamic* Texture)
@@ -857,14 +859,14 @@ void UPOGRSubsystem::Deinitialize()
     }
 }
 
-void UPOGRSubsystem::SendHttpRequest(const FString& URL, const UJsonRequestObject* jsonObject, const FString& SessionId)
+void UPOGRSubsystem::SendHttpRequest(const FString& URL, const UJsonRequestObject* JsonObject, const FString& SessionId)
 {
     TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
     TSharedRef<FJsonObject> RequestObj = MakeShared<FJsonObject>();
 
     FString RequestBody;
     TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&RequestBody);
-    FJsonSerializer::Serialize(jsonObject->GetJsonRequestObject().ToSharedRef(), Writer);
+    FJsonSerializer::Serialize(JsonObject->GetJsonRequestObject().ToSharedRef(), Writer);
 
     Request->SetURL(URL);
     Request->SetVerb(TEXT("POST"));
@@ -914,13 +916,13 @@ void UPOGRSubsystem::SetGameBuildId(FString GameUUID)
                     FJsonSerializer::Deserialize(Reader, ResponseObj);
                 }
 
-                const auto PayloadObject = ResponseObj->GetObjectField("payload");
+                const auto PayloadObject = ResponseObj->GetObjectField(TEXT("payload"));
                 if (PayloadObject.IsValid())
                 {
-                    const TSharedPtr<FJsonObject> GameBuildIdObject = PayloadObject->GetObjectField("game_build");
+                    const TSharedPtr<FJsonObject> GameBuildIdObject = PayloadObject->GetObjectField(TEXT("game_build"));
                     if (GameBuildIdObject.IsValid())
                     {
-                        GameBuildId = GameBuildIdObject->GetStringField("build_id");
+                        GameBuildId = GameBuildIdObject->GetStringField(TEXT("build_id"));
                     }
                 }
             }
@@ -970,7 +972,7 @@ void UPOGRSubsystem::Login()
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("Failed to create WebSocket object for URL: %s"));
+        UE_LOG(LogTemp, Error, TEXT("Failed to create WebSocket object for URL"));
     }
 }
 
@@ -1007,26 +1009,26 @@ void UPOGRSubsystem::OnWebSocketMessage(const FString& Message)
     if (FJsonSerializer::Deserialize(JsonReader, JsonDataObject))
     {
         // Check if the JSON object contains the "payload" field
-        if (JsonDataObject->HasField("payload"))
+        if (JsonDataObject->HasField(TEXT("payload")))
         {
             // Get the "payload" object
-            TSharedPtr<FJsonObject> PayloadObject = JsonDataObject->GetObjectField("payload");
+            TSharedPtr<FJsonObject> PayloadObject = JsonDataObject->GetObjectField(TEXT("payload"));
 
             // Check if the "payload" object contains the "redirect_url" field
-            if (PayloadObject->HasField("redirect_url"))
+            if (PayloadObject->HasField(TEXT("redirect_url")))
             {
                 // Get the value of the "redirect_url" field
-                FString RedirectUrl = PayloadObject->GetStringField("redirect_url");
+                FString RedirectUrl = PayloadObject->GetStringField(TEXT("redirect_url"));
 
                 if (!RedirectUrl.IsEmpty())
                     FPlatformProcess::LaunchURL(*RedirectUrl, nullptr, nullptr);
             }
             
             // Check if the "payload" object contains the "access_token" field
-            if (PayloadObject->HasField("access_token"))
+            if (PayloadObject->HasField(TEXT("access_token")))
             {
                 // Get the value of the "access_token" field
-                AccessTokken = PayloadObject->GetStringField("access_token");
+                AccessTokken = PayloadObject->GetStringField(TEXT("access_token"));
 
                 if (!AccessTokken.IsEmpty())
                 {
@@ -1074,13 +1076,13 @@ void UPOGRSubsystem::SetOrganizationOption(FString OrganizationValue)
 {
     FString OrganizationName = OrganizationValue;
 
-    for (const auto OrgElem : GetOrganizationDataArray())
+    for (const auto& OrgElem : GetOrganizationDataArray())
     {
         if (OrganizationName == OrgElem.Name)
         {
-            Organization = OrgElem;
+            OrganizationDetails = OrgElem;
             bUpdateOptions = true;
-            GetOrganizationGameData(Organization.UUID);
+            GetOrganizationGameData(OrganizationDetails.UUID);
         }
     }
 }
@@ -1103,7 +1105,7 @@ void UPOGRSubsystem::SetGameOption(FString GameValue)
 {
     FString GameTitle = GameValue;
 
-    for (const auto GameElem : GetOrganizationGameDataArray())
+    for (const auto& GameElem : GetOrganizationGameDataArray())
     {
         if (GameTitle == GameElem.GameTitle)
         {
